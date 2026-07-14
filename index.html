@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מחולל קישורי WhatsApp</title>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Google Fonts (Heebo for Hebrew) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Load FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Configure Tailwind and Custom CSS -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Heebo', 'sans-serif'],
+                    },
+                    colors: {
+                        whatsapp: {
+                            light: '#25D366',
+                            DEFAULT: '#128C7E',
+                            dark: '#075E54',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: #e5ddd5; /* WhatsApp chat background color */
+            background-image: url('https://w0.peakpx.com/wallpaper/508/875/HD-wallpaper-whatsapp-background-theme-default-whatsapp-background-whatsapp-theme.jpg');
+            background-blend-mode: overlay;
+            background-color: rgba(255, 255, 255, 0.85);
+        }
+        
+        .toast-enter {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        
+        .toast-leave {
+            animation: slideOut 0.3s ease-in forwards;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(100%); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 w-full max-w-sm transition-all duration-300 transform hover:shadow-whatsapp/20 hover:-translate-y-1">
+        
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 text-whatsapp-light mb-4 shadow-inner">
+                <i class="fa-brands fa-whatsapp text-4xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800">פתיחת שיחת ווטסאפ</h1>
+            <p class="text-sm text-gray-500 mt-2">הזן מספר ישראלי כדי להתחיל שיחה מבלי לשמור אותו באנשי הקשר.</p>
+        </div>
+
+        <!-- Input Section -->
+        <div class="space-y-5">
+            <div>
+                <label for="phoneInput" class="block text-sm font-medium text-gray-700 mb-1">מספר טלפון:</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
+                        <i class="fa-solid fa-phone"></i>
+                    </span>
+                    <input type="tel" id="phoneInput" 
+                        class="block w-full pl-3 pr-10 py-3 border-2 border-gray-200 rounded-xl focus:ring-0 focus:border-whatsapp-light transition-colors text-left font-sans text-lg bg-gray-50 placeholder-gray-400" 
+                        placeholder="05X-XXX-XXXX" dir="ltr" autocomplete="tel">
+                </div>
+                <p id="errorMsg" class="text-red-500 text-xs mt-2 hidden"><i class="fa-solid fa-circle-exclamation ml-1"></i>המספר אינו נראה כמו מספר ישראלי תקין.</p>
+            </div>
+
+            <!-- Optional Message -->
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <label for="messageInput" class="block text-sm font-medium text-gray-700">הודעה ראשונית (אופציונלי):</label>
+                </div>
+                
+                <textarea id="messageInput" rows="3" 
+                    class="block w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-0 focus:border-whatsapp-light transition-colors resize-none bg-white mb-2 text-sm"
+                    placeholder="הזן הודעה שתישלח אוטומטית..."></textarea>
+                
+                <div class="flex">
+                    <button id="addTemplateBtn" type="button" class="flex-1 flex items-center justify-center gap-1.5 text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 py-2 px-3 rounded-lg transition-colors font-medium border border-gray-200">
+                        <i class="fa-solid fa-magic"></i>
+                        <span>הוסף פתיח מרפאה</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 space-y-3">
+            <button id="openBtn" disabled 
+                class="w-full flex items-center justify-center gap-2 bg-whatsapp hover:bg-whatsapp-dark disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-3.5 px-4 rounded-xl transition-colors shadow-md">
+                <i class="fa-brands fa-whatsapp text-xl"></i>
+                <span>פתח בווטסאפ</span>
+            </button>
+            
+            <button id="copyBtn" disabled
+                class="w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed text-gray-700 font-semibold py-3 px-4 rounded-xl transition-colors border border-gray-200">
+                <i class="fa-regular fa-copy"></i>
+                <span>העתק קישור</span>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2 hidden z-50 whitespace-nowrap">
+        <i id="toastIcon" class="fa-solid fa-check-circle text-green-400"></i>
+        <span id="toastMsg" class="font-medium text-sm">הקישור הועתק בהצלחה!</span>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const phoneInput = document.getElementById('phoneInput');
+            const messageInput = document.getElementById('messageInput');
+            const openBtn = document.getElementById('openBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const errorMsg = document.getElementById('errorMsg');
+            const toast = document.getElementById('toast');
+            
+            const addTemplateBtn = document.getElementById('addTemplateBtn');
+
+            let finalUrl = '';
+
+            // The fixed template text
+            const templateText = 'שלום, כאן אביב מהמרפאה של ד"ר מירי צמח, בהמשך לפניה שהשארת לנו. איך אפשר לעזור?';
+
+            // Feature: Add fixed template message
+            addTemplateBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                messageInput.value = templateText;
+                updateLink();
+            });
+
+            // Function to format and validate Israeli phone number
+            function processPhoneNumber(rawNumber) {
+                try {
+                    let cleanNumber = rawNumber.replace(/\D/g, '');
+                    if (!cleanNumber) return null;
+
+                    if (cleanNumber.startsWith('972')) {
+                        // Already has country code
+                    } else if (cleanNumber.startsWith('0')) {
+                        cleanNumber = '972' + cleanNumber.substring(1);
+                    } else if (cleanNumber.length === 8 || cleanNumber.length === 9) {
+                        cleanNumber = '972' + cleanNumber;
+                    }
+
+                    if (cleanNumber.length >= 11 && cleanNumber.length <= 12) {
+                        return cleanNumber;
+                    }
+                    return false;
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            // Function to generate the wa.me link
+            function updateLink() {
+                const rawPhone = phoneInput.value;
+                const message = messageInput.value.trim();
+                
+                if (rawPhone.length === 0) {
+                    errorMsg.classList.add('hidden');
+                    openBtn.disabled = true;
+                    copyBtn.disabled = true;
+                    phoneInput.classList.remove('border-red-400', 'focus:border-red-400');
+                    phoneInput.classList.add('border-gray-200', 'focus:border-whatsapp-light');
+                    finalUrl = '';
+                    return;
+                }
+
+                const validNumber = processPhoneNumber(rawPhone);
+
+                if (validNumber) {
+                    errorMsg.classList.add('hidden');
+                    phoneInput.classList.remove('border-red-400', 'focus:border-red-400');
+                    phoneInput.classList.add('border-green-400', 'focus:border-green-500');
+                    openBtn.disabled = false;
+                    copyBtn.disabled = false;
+
+                    finalUrl = `https://wa.me/${validNumber}`;
+                    
+                    if (message) {
+                        finalUrl += `?text=${encodeURIComponent(message)}`;
+                    }
+                } else {
+                    if (rawPhone.replace(/\D/g, '').length >= 9) {
+                        errorMsg.classList.remove('hidden');
+                        phoneInput.classList.remove('border-gray-200', 'focus:border-whatsapp-light', 'border-green-400', 'focus:border-green-500');
+                        phoneInput.classList.add('border-red-400', 'focus:border-red-400');
+                    } else {
+                        errorMsg.classList.add('hidden');
+                        phoneInput.classList.remove('border-red-400', 'focus:border-red-400', 'border-green-400', 'focus:border-green-500');
+                        phoneInput.classList.add('border-gray-200', 'focus:border-whatsapp-light');
+                    }
+                    
+                    openBtn.disabled = true;
+                    copyBtn.disabled = true;
+                    finalUrl = '';
+                }
+            }
+
+            phoneInput.addEventListener('input', updateLink);
+            messageInput.addEventListener('input', updateLink);
+
+            // Open WhatsApp logic
+            openBtn.addEventListener('click', () => {
+                if (finalUrl) {
+                    window.open(finalUrl, '_blank');
+                }
+            });
+
+            // Copy Link logic
+            copyBtn.addEventListener('click', () => {
+                if (!finalUrl) return;
+
+                const textArea = document.createElement("textarea");
+                textArea.value = finalUrl;
+                document.body.appendChild(textArea);
+                textArea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    showToast('הקישור הועתק בהצלחה!', 'success');
+                } catch (err) {
+                    showToast('שגיאה בהעתקת הקישור', 'error');
+                }
+                
+                document.body.removeChild(textArea);
+            });
+
+            // Show Toast function with types (success, error, warning)
+            let toastTimeout;
+            function showToast(message, type = 'success') {
+                const toastMsg = document.getElementById('toastMsg');
+                const toastIcon = document.getElementById('toastIcon');
+                
+                toastMsg.textContent = message;
+                
+                // Change icon based on type
+                if (type === 'success') {
+                    toastIcon.className = "fa-solid fa-check-circle text-green-400";
+                } else if (type === 'error') {
+                    toastIcon.className = "fa-solid fa-circle-xmark text-red-400";
+                } else if (type === 'warning') {
+                    toastIcon.className = "fa-solid fa-circle-exclamation text-yellow-400";
+                }
+                
+                toast.classList.remove('hidden', 'toast-leave');
+                toast.classList.add('toast-enter');
+                
+                clearTimeout(toastTimeout);
+                toastTimeout = setTimeout(() => {
+                    toast.classList.remove('toast-enter');
+                    toast.classList.add('toast-leave');
+                    
+                    setTimeout(() => {
+                        if(toast.classList.contains('toast-leave')) {
+                            toast.classList.add('hidden');
+                        }
+                    }, 300);
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
